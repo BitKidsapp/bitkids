@@ -31,14 +31,17 @@ export default function AuthPage() {
       })
       if (error) {
         setError(error.message)
-      } else if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            name,
-            role
-          })
+     } else if (data.user) {
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .insert({
+      id: data.user.id,
+      name,
+      role,
+      avatar_emoji: role === 'parent' ? '👨‍👩‍👧' : '🧒'
+    })
         if (profileError) setError(profileError.message)
         else window.location.href = '/dashboard'
       }
