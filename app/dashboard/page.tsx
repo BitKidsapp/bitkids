@@ -104,10 +104,10 @@ export default function DashboardPage() {
               <span className="text-2xl">➕</span>
               Create Chore
             </button>
-            <button className="bg-[#0F1318] border border-white/7 text-white font-black py-4 px-6 rounded-2xl text-lg hover:border-[#F7931A]/40 transition-colors flex items-center gap-3">
-              <span className="text-2xl">👤</span>
-              Add Child
-            </button>
+           <a href="/dashboard/add-child" className="bg-[#0F1318] border border-white/7 text-white font-black py-4 px-6 rounded-2xl text-lg hover:border-[#F7931A]/40 transition-colors flex items-center gap-3">
+  <span className="text-2xl">👤</span>
+  Add Child
+</a>
           </div>
         )}
 
