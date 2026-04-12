@@ -1,9 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="Logo/BitKids Logo Transparent Banner.png">
-    <source media="(prefers-color-scheme: light)" srcset="Logo/BitKids Logo Black Banner.png">
-    <img alt="BitKids" src="Logo/BitKids Logo Black Banner.png" width="600">
-  </picture>
+  <img src="Logo/BitKids Logo Transparent Banner.png" alt="BitKids" width="600">
   <br>
   <strong>Free. Open Source. Built for Bitcoin Families.</strong>
 </p>
