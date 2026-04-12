@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BitKids — Earn Sats. Learn Bitcoin. Grow Up Sovereign.</title>
+<meta name="description" content="The free, open-source Bitcoin chore and commission app for families. Kids earn real satoshis for real work. Parents verify and pay from their own wallet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #F7931A;
+    --orange-light: #FFB347;
+    --orange-glow: rgba(247,147,26,0.2);
+    --sky: #3AADFF;
+    --black: #080B10;
+    --surface: #0F1318;
+    --surface2: #161B22;
+    --border: rgba(255,255,255,0.07);
+    --text: #F0F2F5;
+    --muted: #7A8494;
+    --green: #22C55E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Nunito Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  .bg-orbs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: drift 20s infinite alternate ease-in-out;
+  }
+
+  .orb-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(247,147,26,0.15), transparent 70%);
+    top: -200px; left: -200px;
+    animation-duration: 25s;
+  }
+
+  .orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(58,173,255,0.1), transparent 70%);
+    bottom: 100px; right: -100px;
+    animation-duration: 20s;
+    animation-delay: -10s;
+  }
+
+  .orb-3 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(247,147,26,0.08), transparent 70%);
+    top: 50%; left: 50%;
+    animation-duration: 30s;
+    animation-delay: -5s;
+  }
+
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(60px, 40px) scale(1.1); }
+  }
+
+  /* ── FLOATING SATS ── */
+  .floating-sats {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .sat {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0;
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 16px 0;
+    background: rgba(8,11,16,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #FFD166, #F7931A, #C85A00);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: white;
+    box-shadow: 0 4px 16px rgba(247,147,26,0.4);
+  }
+
+  .nav-logo-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: white;
+  }
+
+  .nav-logo-text .k { color: var(--orange-light); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-link {
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover { color: white; }
+
+  .nav-github {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .nav-github:hover {
+    border-color: var(--orange-border);
+    background: rgba(247,147,26,0.08);
+  }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 0 80px;
+    text-align: center;
+  }
+
+  .hero-inner {
+    width: 100%;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(247,147,26,0.1);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--orange-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-headline {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-headline .line-1 { color: white; display: block; }
+  .hero-headline .line-2 { color: var(--orange-light); display: block; }
+  .hero-headline .line-3 { color: white; display: block; }
+
+  .hero-sub {
+    font-size: clamp(17px, 2.5vw, 22px);
+    font-weight: 600;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-sub strong { color: rgba(240,242,245,0.9); font-weight: 800; }
+
+  .hero-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 64px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--orange-light), var(--orange));
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    padding: 16px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 8px 32px rgba(247,147,26,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(247,147,26,0.45);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    padding: 16px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-secondary:hover {
+    border-color: rgba(247,147,26,0.4);
+    transform: translateY(-2px);
+  }
+
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .pill {
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    letter-spacing: 0.04em;
+  }
+
+  .pill.orange {
+    background: rgba(247,147,26,0.1);
+    border-color: rgba(247,147,26,0.3);
+    color: var(--orange-light);
+  }
+
+  .pill.green {
+    background: rgba(34,197,94,0.1);
+    border-color: rgba(34,197,94,0.25);
+    color: var(--green);
+  }
+
+  .pill.blue {
+    background: rgba(58,173,255,0.1);
+    border-color: rgba(58,173,255,0.25);
+    color: var(--sky);
+  }
+
+  .pill.purple {
+    background: rgba(168,85,247,0.1);
+    border-color: rgba(168,85,247,0.3);
+    color: #C084FC;
+  }
+
+  .pill.red {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #FCA5A5;
+  }
+
+  .pill.teal {
+    background: rgba(20,184,166,0.1);
+    border-color: rgba(20,184,166,0.3);
+    color: #5EEAD4;
+  }
+
+  /* ── BETA SIGNUP ── */
+  .beta-section { padding: 100px 0; }
+
+  .beta-box {
+    background: linear-gradient(135deg, rgba(58,173,255,0.06) 0%, var(--surface) 60%);
+    border: 1px solid rgba(58,173,255,0.2);
+    border-radius: 32px;
+    padding: 64px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .beta-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--sky), transparent);
+  }
+
+  .beta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(58,173,255,0.1);
+    border: 1px solid rgba(58,173,255,0.3);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--sky);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .beta-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .beta-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  .beta-sub strong { color: var(--orange-light); font-weight: 800; }
+
+  .beta-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(240,242,245,0.7);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .form-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 600;
+    color: white;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .form-input::placeholder { color: var(--muted); }
+
+  .form-input:focus {
+    border-color: rgba(58,173,255,0.5);
+    background: rgba(58,173,255,0.05);
+  }
+
+  .radio-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .radio-option { cursor: pointer; }
+  .radio-option input { display: none; }
+
+  .radio-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 16px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+
+  .radio-option input:checked + .radio-btn {
+    border-color: var(--sky);
+    background: rgba(58,173,255,0.08);
+  }
+
+  .radio-icon { font-size: 28px; }
+
+  .radio-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    color: white;
+  }
+
+  .radio-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .beta-submit {
+    background: linear-gradient(135deg, var(--sky), #1A7FC4);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    padding: 18px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 32px rgba(58,173,255,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .beta-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(58,173,255,0.4);
+  }
+
+  .beta-fine-print {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .beta-success {
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .success-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+  }
+
+  .success-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 10px;
+  }
+
+  .success-desc {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .radio-group { grid-template-columns: 1fr; }
+    .beta-box { padding: 36px 24px; }
+  }
+
+  /* ── BETA SIGNUP ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--orange);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .section-title .accent { color: var(--orange-light); }
+
+  .section-sub {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 56px;
+  }
+
+  /* ── THE PROBLEM ── */
+  .problem-section { padding: 100px 0; }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .problem-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .problem-card:hover {
+    border-color: rgba(247,147,26,0.25);
+    transform: translateY(-3px);
+  }
+
+  .problem-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(247,147,26,0.5), transparent);
+  }
+
+  .problem-num {
+    font-family: 'Nunito', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: rgba(247,147,26,0.12);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .problem-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .problem-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { padding: 100px 0; }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 27px; top: 28px; bottom: 28px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--orange) 0%, var(--sky) 100%);
+    opacity: 0.25;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 18px 0;
+  }
+
+  .flow-num {
+    width: 56px; height: 56px;
+    background: var(--surface2);
+    border: 2px solid rgba(247,147,26,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--orange-light);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-content { padding-top: 8px; }
+
+  .flow-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .flow-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── PHONE MOCKUP ── */
+  .phone-mockup {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .phone-frame {
+    width: 280px;
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .phone-notch {
+    background: var(--black);
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phone-notch-bar {
+    width: 80px; height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+  }
+
+  .phone-nav {
+    background: #0A0D12;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .phone-nav-logo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .phone-nav-icon {
+    width: 22px; height: 22px;
+    background: linear-gradient(135deg, #FFD166, #F7931A);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 900; color: white;
+  }
+
+  .phone-hero-bar {
+    background: linear-gradient(135deg, #E06B00, #F7931A, #FFB347);
+    padding: 16px;
+  }
+
+  .phone-greeting {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .phone-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: white;
+  }
+
+  .phone-balance {
+    background: white;
+    margin: -16px 12px 0;
+    border-radius: 16px;
+    padding: 14px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .phone-balance-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .phone-balance-amount {
+    font-family: 'Nunito', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: #111;
+  }
+
+  .phone-balance-amount .unit {
+    font-size: 13px;
+    color: var(--orange);
+    font-weight: 800;
+  }
+
+  .phone-body { padding: 16px 12px; }
+
+  .phone-section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 10px;
+  }
+
+  .phone-chore {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .phone-chore-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .phone-chore-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: white;
+    flex: 1;
+  }
+
+  .phone-chore-meta {
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .phone-chore-sats {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .phone-done-btn {
+    background: linear-gradient(135deg, var(--orange-light), var(--orange));
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: none;
+    white-space: nowrap;
+  }
+
+  /* ── FEATURES ── */
+  .features-section { padding: 100px 0; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 24px 22px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(247,147,26,0.3);
+    transform: translateY(-3px);
+  }
+
+  .feature-emoji {
+    font-size: 32px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feature-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── PRINCIPLES ── */
+  .principles-section { padding: 100px 0; }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .principle {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  .principle-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+    margin-top: 5px;
+    box-shadow: 0 0 12px rgba(247,147,26,0.6);
+  }
+
+  .principle-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .principle-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── OPEN SOURCE CTA ── */
+  .cta-section { padding: 100px 0; }
+
+  .cta-box {
+    background: linear-gradient(135deg, rgba(247,147,26,0.08) 0%, var(--surface) 60%);
+    border: 1px solid rgba(247,147,26,0.2);
+    border-radius: 32px;
+    padding: 64px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  }
+
+  .cta-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+  }
+
+  .cta-title .accent { color: var(--orange-light); }
+
+  .cta-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .founder-note {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .founder-note-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+
+  .founder-note-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-style: italic;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .footer-logo .k { color: var(--orange-light); }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-link:hover { color: white; }
+
+  .footer-copy {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .problem-grid,
+    .how-grid,
+    .features-grid,
+    .principles-grid { grid-template-columns: 1fr; }
+    .phone-mockup { display: none; }
+    .nav-links { display: none; }
+    .cta-box { padding: 40px 24px; }
+    .footer-inner { flex-direction: column; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- FLOATING SATS -->
+<div class="floating-sats" id="floatingSats"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">₿K</div>
+      <span class="nav-logo-text">Bit<span class="k">Kids</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#how" class="nav-link">How It Works</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#beta" class="nav-link" style="color:var(--sky);">Join Beta</a>
+      <a href="https://github.com/BitKidsApp/bitkids" target="_blank" class="nav-github">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-badge">⚡ Coming Soon — Free & Open Source</div>
+      <h1 class="hero-headline">
+        <span class="line-1">Earn Sats.</span>
+        <span class="line-2">Learn Bitcoin.</span>
+        <span class="line-3">Grow Up Sovereign.</span>
+      </h1>
+      <p class="hero-sub">
+        BitKids is the Bitcoin chore and commission app for families.
+        Kids earn <strong>real satoshis</strong> for real work.
+        Parents verify and pay from <strong>their own wallet.</strong>
+        No subscriptions. No custody. No middleman.
+      </p>
+      <div class="hero-buttons">
+        <a href="https://github.com/BitKidsApp/bitkids" target="_blank" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          View on GitHub
+        </a>
+        <a href="https://mempool.space/address/bc1q26fkns4lj8ldnv2g5w4nhjuwpww56s58jxfym4" target="_blank" class="btn-secondary">
+          ⚡ Support This Project
+        </a>
+      </div>
+      <div class="hero-pills">
+        <span class="pill orange">₿ Bitcoin-Native</span>
+        <span class="pill green">100% Free Forever</span>
+        <span class="pill blue">Open Source</span>
+        <span class="pill purple">Self-Custody Only</span>
+        <span class="pill red">Built in the USA 🇺🇸</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THE PROBLEM -->
+<section class="problem-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">The Problem</div>
+      <h2 class="section-title">Nobody built this for<br><span class="accent">Bitcoin families.</span></h2>
+      <p class="section-sub">Every existing app either ignores Bitcoin completely, holds your kids' sats in a custodial wallet, or charges you a monthly fee to use your own keys.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="problem-num">01</div>
+        <div class="problem-title">Fiat apps ignore Bitcoin</div>
+        <div class="problem-desc">Greenlight, BusyKid, GoHenry — all USD, all linked to debit cards. No sats. Teaching kids to use the same broken financial system we're trying to escape.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-num">02</div>
+        <div class="problem-title">Bitcoin apps charge subscriptions</div>
+        <div class="problem-desc">The only live Bitcoin chore app gates self-custody wallets behind a paid subscription. You pay monthly to use your own keys. That's backwards.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-num">03</div>
+        <div class="problem-title">Nobody designed for the kid</div>
+        <div class="problem-desc">Every app is built for the parent's dashboard. The child's experience is an afterthought. No kid gets excited to open a dark navy fintech UI.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-num">04</div>
+        <div class="problem-title">Closed source means blind trust</div>
+        <div class="problem-desc">Bitcoin families are self-sovereignty minded. Asking them to trust a closed-source app with their kids' sat balances is a fundamental values mismatch.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="how-grid">
+      <div>
+        <div class="reveal">
+          <div class="section-tag">How It Works</div>
+          <h2 class="section-title">Simple by design.<br><span class="accent">Powerful by default.</span></h2>
+          <p class="section-sub">BitKids is a coordination layer — not a wallet, not a bank. It connects the work kids do to the Bitcoin parents already hold.</p>
+        </div>
+        <div class="flow">
+          <div class="flow-step reveal">
+            <div class="flow-num">1</div>
+            <div class="flow-content">
+              <div class="flow-title">Parent sets up the family</div>
+              <div class="flow-desc">Create an account, add child profiles, and input your Bitcoin wallet address. Any wallet works — on-chain or Lightning.</div>
+            </div>
+          </div>
+          <div class="flow-step reveal">
+            <div class="flow-num">2</div>
+            <div class="flow-content">
+              <div class="flow-title">Kids get invited</div>
+              <div class="flow-desc">Children create their profile and add their own Bitcoin address. Their sats go directly to their wallet — not a custodial account.</div>
+            </div>
+          </div>
+          <div class="flow-step reveal">
+            <div class="flow-num">3</div>
+            <div class="flow-content">
+              <div class="flow-title">Parent creates tasks & sets sat values</div>
+              <div class="flow-desc">Recurring chores, one-off tasks, and learning assignments with YouTube links. Every task gets a commission in sats.</div>
+            </div>
+          </div>
+          <div class="flow-step reveal">
+            <div class="flow-num">4</div>
+            <div class="flow-content">
+              <div class="flow-title">Kid taps Done ⚡</div>
+              <div class="flow-desc">Kids see their tasks on a dashboard built for them — colorful, motivating, and designed to feel like a game worth opening.</div>
+            </div>
+          </div>
+          <div class="flow-step reveal">
+            <div class="flow-num">5</div>
+            <div class="flow-content">
+              <div class="flow-title">Parent verifies & sends sats</div>
+              <div class="flow-desc">Parent gets notified, reviews the task, opens their wallet app, sends sats directly to the kid's address. BitKids never touches the funds.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONE MOCKUP -->
+      <div class="phone-mockup reveal">
+        <div class="phone-frame">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-nav">
+            <div class="phone-nav-logo">
+              <div class="phone-nav-icon">₿K</div>
+              Bit<span style="color:var(--orange-light);">Kids</span>
+            </div>
+            <span style="font-size:18px;">🔔</span>
+          </div>
+          <div class="phone-hero-bar">
+            <div class="phone-greeting">Welcome back</div>
+            <div class="phone-name">Emma ⚡</div>
+          </div>
+          <div style="padding:0 12px;">
+            <div class="phone-balance" style="margin-top:-16px;">
+              <div class="phone-balance-label">Sats Earned</div>
+              <div class="phone-balance-amount">2,400<span class="unit"> sats</span></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">+ <span style="color:var(--orange);font-weight:700;">500 sats</span> pending</div>
+            </div>
+          </div>
+          <div class="phone-body">
+            <div class="phone-section-title">My Chores</div>
+            <div class="phone-chore">
+              <div class="phone-chore-icon">🧹</div>
+              <div>
+                <div class="phone-chore-name">Sweep the porch</div>
+                <div class="phone-chore-meta">Weekly · Due today</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="phone-chore-sats">500 sats</div>
+                <div style="font-size:10px;color:#B8860B;background:#FFF3CD;padding:2px 6px;border-radius:8px;margin-top:2px;">⏳ Verifying</div>
+              </div>
+            </div>
+            <div class="phone-chore">
+              <div class="phone-chore-icon">🍽️</div>
+              <div>
+                <div class="phone-chore-name">Set the table</div>
+                <div class="phone-chore-meta">Daily · Due today</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="phone-chore-sats">250 sats</div>
+                <button class="phone-done-btn">Done! ⚡</button>
+              </div>
+            </div>
+            <div class="phone-chore">
+              <div class="phone-chore-icon">🎓</div>
+              <div>
+                <div class="phone-chore-name">Watch: What is Bitcoin?</div>
+                <div class="phone-chore-meta">Learning task</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="phone-chore-sats">300 sats</div>
+                <button class="phone-done-btn">Done! ⚡</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">V1 Features</div>
+      <h2 class="section-title">Everything you need.<br><span class="accent">Nothing you don't.</span></h2>
+      <p class="section-sub">Version 1 ships a focused, complete feature set. No bloat. No paywalls. No features held hostage behind a subscription.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <span class="feature-emoji">👨‍👩‍👧‍👦</span>
+        <div class="feature-title">Family Accounts</div>
+        <div class="feature-desc">One parent account, multiple child profiles. Each child has their own dashboard, wallet address, and task list.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">🔁</span>
+        <div class="feature-title">Recurring Chores</div>
+        <div class="feature-desc">Daily, weekly, or custom frequency. Chores reset automatically — parents set it once and it runs forever.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">⚡</span>
+        <div class="feature-title">One-Off Tasks</div>
+        <div class="feature-desc">Single tasks with optional due dates. Great for special projects or bonus commission opportunities.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">🎓</span>
+        <div class="feature-title">Learning Tasks</div>
+        <div class="feature-desc">Parent writes a task, attaches a YouTube link, sets a sat reward. Watch, learn, earn. Bitcoin education built in.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">₿</span>
+        <div class="feature-title">BYO Wallet</div>
+        <div class="feature-desc">Any Bitcoin address works. On-chain or Lightning. Coldcard, Trezor, Phoenix, Muun — whatever you use.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">✅</span>
+        <div class="feature-title">Parent Verification</div>
+        <div class="feature-desc">No automatic payments. Parent reviews and approves every task. Every sat transfer requires a human decision.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">🔔</span>
+        <div class="feature-title">Push Notifications</div>
+        <div class="feature-desc">Parent notified the moment a child marks a task complete. No more chasing kids to find out if it's done.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">📊</span>
+        <div class="feature-title">Sat History Log</div>
+        <div class="feature-desc">Running record of tasks completed, sats earned, and payments sent. Both parent and child can see the full history.</div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-emoji">📱</span>
+        <div class="feature-title">Installable Web App</div>
+        <div class="feature-desc">Progressive Web App — install it on your phone from the browser. No App Store required to get started.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRINCIPLES -->
+<section class="principles-section" id="principles">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">Core Principles</div>
+      <h2 class="section-title">Non-negotiable<br><span class="accent">from day one.</span></h2>
+      <p class="section-sub">These aren't marketing bullets. They're architectural constraints that shape every product decision we make.</p>
+    </div>
+    <div class="principles-grid">
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Non-custodial always</div>
+          <div class="principle-desc">BitKids never holds funds. Wallet addresses are stored strings. All payments happen in your own wallet app.</div>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Parent as final authority</div>
+          <div class="principle-desc">No automatic payments. Every sat transfer requires human review and approval. Trust, but verify.</div>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Free forever, no exceptions</div>
+          <div class="principle-desc">No subscriptions. No freemium tiers. No features held hostage. The full product is free for every family, always.</div>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Open source, fully auditable</div>
+          <div class="principle-desc">Every line of code is public on GitHub under MIT license. Read it, audit it, fork it, contribute to it.</div>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Designed for kids, not just about kids</div>
+          <div class="principle-desc">The child's UI must feel like something a kid actually wants to open — not a dashboard their parent lets them see.</div>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-dot"></div>
+        <div>
+          <div class="principle-title">Commission, not allowance</div>
+          <div class="principle-desc">Kids earn Bitcoin by doing real work. This is proof-of-work parenting — value exchanged for effort.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BETA SIGNUP -->
+<section class="beta-section" id="beta">
+  <div class="container">
+    <div class="beta-box reveal">
+      <div class="beta-badge">⚡ Limited — First 20 Only</div>
+      <h2 class="beta-title">Join the <span class="accent">Beta</span></h2>
+      <p class="beta-sub">Be one of the first 20 families to test BitKids — and earn <strong>$25 in sats</strong> for helping us build it. Sats sent when testing begins.</p>
+
+      <form name="beta-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="beta-form" id="betaForm">
+        <input type="hidden" name="form-name" value="beta-signup">
+        <p style="display:none;"><input name="bot-field"></p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" name="name" placeholder="Satoshi Nakamoto" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" placeholder="you@example.com" required class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">I am a...</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="role" value="parent" required>
+              <span class="radio-btn">
+                <span class="radio-icon">👨‍👩‍👧</span>
+                <span class="radio-label">Parent</span>
+                <span class="radio-desc">I want to use BitKids with my kids</span>
+              </span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="role" value="developer">
+              <span class="radio-btn">
+                <span class="radio-icon">💻</span>
+                <span class="radio-label">Developer</span>
+                <span class="radio-desc">I want to contribute to the project</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="beta-submit">Apply for Beta Access ⚡</button>
+        <p class="beta-fine-print">First 20 applicants only. Sats sent when testing begins. We'll never spam you.</p>
+      </form>
+
+      <div class="beta-success" id="betaSuccess" style="display:none;">
+        <div class="success-icon">⚡</div>
+        <div class="success-title">You're on the list!</div>
+        <div class="success-desc">We'll reach out when BitKids is ready for testing. Get ready to stack some sats.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box reveal">
+      <div class="section-tag" style="text-align:center;">Open Source</div>
+      <div class="cta-title">Built in the open.<br><span class="accent">For Bitcoin families.</span><br>Everywhere.</div>
+      <p class="cta-sub">BitKids is a community project. The code is public, the mission is clear, and contributions are welcome. If you're a developer who believes in Bitcoin and sound money for kids — we'd love your help.</p>
+      <div class="cta-buttons">
+        <a href="https://github.com/BitKidsApp/bitkids" target="_blank" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          View on GitHub
+        </a>
+        <a href="/cdn-cgi/l/email-protection#bfd7dad3d3d0ffddd6cbd4d6dbcc91cacc" class="btn-secondary">
+          Get In Touch
+        </a>
+      </div>
+      <div class="founder-note">
+        <div class="founder-note-label">A note from the founder</div>
+        <div class="founder-note-text">"I'm not a developer — I'm someone who believes in Bitcoin, believes in teaching kids sound money principles, and had an idea worth building. This project has been designed and planned with the help of AI tools, and I'm learning as I go. If you're a developer who shares this vision, I'd love to build this together."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <div class="nav-logo-icon" style="width:28px;height:28px;font-size:12px;">₿K</div>
+      Bit<span class="k">Kids</span>
+    </a>
+    <div class="footer-links">
+      <a href="https://github.com/BitKidsApp/bitkids" target="_blank" class="footer-link">GitHub</a>
+      <a href="/cdn-cgi/l/email-protection#cba3aea7a7a48ba9a2bfa0a2afb8e5beb8" class="footer-link"><span class="__cf_email__" data-cfemail="365e535a5a5976545f425d5f5245184345">[email&#160;protected]</span></a>
+      <a href="https://github.com/BitKidsApp/bitkids/blob/main/LICENSE" target="_blank" class="footer-link">MIT License</a>
+    </div>
+    <div class="footer-copy">© 2026 BitKids · Built in the USA · Free Forever</div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Floating sats animation
+  const container = document.getElementById('floatingSats');
+  const symbols = ['₿', '⚡', '₿', '⚡', '₿'];
+  for (let i = 0; i < 15; i++) {
+    const sat = document.createElement('div');
+    sat.className = 'sat';
+    sat.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    sat.style.left = Math.random() * 100 + 'vw';
+    sat.style.animationDuration = (15 + Math.random() * 20) + 's';
+    sat.style.animationDelay = (Math.random() * 20) + 's';
+    sat.style.fontSize = (14 + Math.random() * 16) + 'px';
+    container.appendChild(sat);
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Beta form success handling
+  const betaForm = document.getElementById('betaForm');
+  const betaSuccess = document.getElementById('betaSuccess');
+
+  if (betaForm) {
+    betaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(betaForm);
+      try {
+        await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(formData).toString()
+        });
+        betaForm.style.display = 'none';
+        betaSuccess.style.display = 'block';
+      } catch (err) {
+        alert('Something went wrong. Please try again or email hello@bitkids.us');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
