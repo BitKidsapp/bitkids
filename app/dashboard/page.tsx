@@ -24,7 +24,6 @@ export default function DashboardPage() {
       setProfile(profile)
 
       if (profile?.role === 'parent') {
-        // Get family
         const { data: family } = await supabase
           .from('families')
           .select('id')
@@ -32,7 +31,6 @@ export default function DashboardPage() {
           .single()
 
         if (family) {
-          // Get chores
           const { data: chores } = await supabase
             .from('chores')
             .select('*')
@@ -42,7 +40,6 @@ export default function DashboardPage() {
 
           setChores(chores || [])
 
-          // Get children
           const { data: children } = await supabase
             .from('profiles')
             .select('*')
@@ -51,7 +48,6 @@ export default function DashboardPage() {
 
           setChildren(children || [])
 
-          // Get pending completions
           const { count } = await supabase
             .from('completions')
             .select('*', { count: 'exact', head: true })
@@ -96,7 +92,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#080B10]">
-      {/* Nav */}
       <nav className="bg-[#0A0D12] border-b border-white/7 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FFD166] to-[#F7931A] flex items-center justify-center text-white font-black text-base">
@@ -115,7 +110,6 @@ export default function DashboardPage() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Welcome */}
         <div className="mb-10">
           <h1 className="text-white font-black text-4xl mb-2" style={{fontFamily: 'Nunito, sans-serif'}}>
             Welcome, {profile?.name?.split(' ')[0]} 👋
@@ -127,7 +121,6 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-10">
           <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-6">
             <div className="text-[#7A8494] text-xs font-bold uppercase tracking-wider mb-2">Active Chores</div>
@@ -143,7 +136,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Actions */}
         {profile?.role === 'parent' && (
           <div className="grid grid-cols-2 gap-4 mb-10">
             <a href="/dashboard/create-chore" className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black py-4 px-6 rounded-2xl text-lg hover:opacity-90 transition-opacity flex items-center gap-3">
@@ -157,7 +149,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Children */}
         {profile?.role === 'parent' && children.length > 0 && (
           <div className="mb-10">
             <h2 className="text-white font-black text-xl mb-4" style={{fontFamily: 'Nunito, sans-serif'}}>
@@ -165,7 +156,7 @@ export default function DashboardPage() {
             </h2>
             <div className="flex gap-3">
               {children.map(child => (
-                <div key={child.id} className="bg-[#0F1318] border border-white/7 rounded-2xl p-4 flex items-center gap-3">
+                <a key={child.id} href={`/dashboard/kid/${child.id}`} className="bg-[#0F1318] border border-white/7 rounded-2xl p-4 flex items-center gap-3 hover:border-[#F7931A]/40 transition-colors">
                   <div className="w-10 h-10 rounded-full bg-[#F7931A]/20 flex items-center justify-center text-xl">
                     {child.avatar_emoji || '🧒'}
                   </div>
@@ -173,13 +164,12 @@ export default function DashboardPage() {
                     <div className="text-white font-bold text-sm">{child.name}</div>
                     <div className="text-[#7A8494] text-xs font-semibold">0 sats earned</div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
         )}
 
-        {/* Chores list */}
         {chores.length > 0 ? (
           <div>
             <h2 className="text-white font-black text-xl mb-4" style={{fontFamily: 'Nunito, sans-serif'}}>
