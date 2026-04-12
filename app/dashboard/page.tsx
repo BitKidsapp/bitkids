@@ -116,7 +116,7 @@ export default function DashboardPage() {
           </h1>
           <p className="text-[#7A8494] font-semibold">
             {profile?.role === 'parent'
-              ? 'Manage your family\'s chores and commissions'
+              ? "Manage your family's chores and commissions"
               : 'Check your chores and earn some sats ⚡'}
           </p>
         </div>
@@ -126,10 +126,13 @@ export default function DashboardPage() {
             <div className="text-[#7A8494] text-xs font-bold uppercase tracking-wider mb-2">Active Chores</div>
             <div className="text-white font-black text-3xl" style={{fontFamily: 'Nunito, sans-serif'}}>{chores.length}</div>
           </div>
-          <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-6">
+          <button
+            onClick={() => window.location.href = '/dashboard/verify'}
+            className="bg-[#0F1318] border border-white/7 rounded-2xl p-6 text-left hover:border-[#F7931A]/40 transition-colors cursor-pointer w-full"
+          >
             <div className="text-[#7A8494] text-xs font-bold uppercase tracking-wider mb-2">Pending Review</div>
             <div className="text-white font-black text-3xl" style={{fontFamily: 'Nunito, sans-serif'}}>{pendingCount}</div>
-          </div>
+          </button>
           <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-6">
             <div className="text-[#7A8494] text-xs font-bold uppercase tracking-wider mb-2">Children</div>
             <div className="text-[#F7931A] font-black text-3xl" style={{fontFamily: 'Nunito, sans-serif'}}>{children.length}</div>
@@ -138,14 +141,20 @@ export default function DashboardPage() {
 
         {profile?.role === 'parent' && (
           <div className="grid grid-cols-2 gap-4 mb-10">
-            <a href="/dashboard/create-chore" className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black py-4 px-6 rounded-2xl text-lg hover:opacity-90 transition-opacity flex items-center gap-3">
+            <button
+              onClick={() => window.location.href = '/dashboard/create-chore'}
+              className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black py-4 px-6 rounded-2xl text-lg hover:opacity-90 transition-opacity flex items-center gap-3"
+            >
               <span className="text-2xl">➕</span>
               Create Chore
-            </a>
-            <a href="/dashboard/add-child" className="bg-[#0F1318] border border-white/7 text-white font-black py-4 px-6 rounded-2xl text-lg hover:border-[#F7931A]/40 transition-colors flex items-center gap-3">
+            </button>
+            <button
+              onClick={() => window.location.href = '/dashboard/add-child'}
+              className="bg-[#0F1318] border border-white/7 text-white font-black py-4 px-6 rounded-2xl text-lg hover:border-[#F7931A]/40 transition-colors flex items-center gap-3"
+            >
               <span className="text-2xl">👤</span>
               Add Child
-            </a>
+            </button>
           </div>
         )}
 
@@ -156,15 +165,19 @@ export default function DashboardPage() {
             </h2>
             <div className="flex gap-3">
               {children.map(child => (
-                <a key={child.id} href={`/dashboard/kid/${child.id}`} className="bg-[#0F1318] border border-white/7 rounded-2xl p-4 flex items-center gap-3 hover:border-[#F7931A]/40 transition-colors">
+                <button
+                  key={child.id}
+                  onClick={() => window.location.href = `/dashboard/kid/${child.id}`}
+                  className="bg-[#0F1318] border border-white/7 rounded-2xl p-4 flex items-center gap-3 hover:border-[#F7931A]/40 transition-colors"
+                >
                   <div className="w-10 h-10 rounded-full bg-[#F7931A]/20 flex items-center justify-center text-xl">
                     {child.avatar_emoji || '🧒'}
                   </div>
-                  <div>
+                  <div className="text-left">
                     <div className="text-white font-bold text-sm">{child.name}</div>
                     <div className="text-[#7A8494] text-xs font-semibold">0 sats earned</div>
                   </div>
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -209,7 +222,7 @@ export default function DashboardPage() {
             <p className="text-[#7A8494] font-semibold max-w-sm mx-auto">
               {profile?.role === 'parent'
                 ? 'Add your children and create your first chore to get started.'
-                : 'Your parent hasn\'t assigned any chores yet. Check back soon!'}
+                : "Your parent hasn't assigned any chores yet. Check back soon!"}
             </p>
           </div>
         )}
