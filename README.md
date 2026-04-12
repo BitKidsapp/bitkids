@@ -99,7 +99,7 @@ The app is a coordination layer only. BitKids never touches funds.
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Backend & Auth | Supabase |
-| Hosting | Vercel |
+| Hosting | Netlify |
 | Repo | GitHub (MIT License) |
 
 ---
