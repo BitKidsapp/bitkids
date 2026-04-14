@@ -23,11 +23,7 @@ export default function VerifyPage() {
 
       const { data: completions } = await supabase
         .from('completions')
-        .select(`
-          *,
-          chore:chores(*),
-          child:profiles!completions_child_id_fkey(*)
-        `)
+        .select('*, chore:chores(*), child:profiles!completions_child_id_fkey(*)')
         .eq('family_id', family.id)
         .eq('status', 'pending')
         .order('completed_at', { ascending: false })
