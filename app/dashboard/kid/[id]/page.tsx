@@ -11,12 +11,14 @@ export default function KidDashboardPage() {
   const [child, setChild] = useState<any>(null)
   const [chores, setChores] = useState<any[]>([])
   const [completions, setCompletions] = useState<any[]>([])
+  const [allCompletions, setAllCompletions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [tapping, setTapping] = useState<string | null>(null)
   const [editingAddress, setEditingAddress] = useState(false)
   const [bitcoinAddress, setBitcoinAddress] = useState('')
   const [savingAddress, setSavingAddress] = useState(false)
   const [addressSaved, setAddressSaved] = useState(false)
+  const [activeTab, setActiveTab] = useState<'chores' | 'history'>('chores')
 
   useEffect(() => {
     const getData = async () => {
@@ -46,8 +48,17 @@ export default function KidDashboardPage() {
           .from('completions')
           .select('*')
           .eq('child_id', childId)
+          .order('completed_at', { ascending: false })
 
         setCompletions(completions || [])
+
+        const { data: allComp } = await supabase
+          .from('completions')
+          .select('*, chore:chores(*)')
+          .eq('child_id', childId)
+          .order('completed_at', { ascending: false })
+
+        setAllCompletions(allComp || [])
       }
 
       setLoading(false)
@@ -101,8 +112,17 @@ export default function KidDashboardPage() {
         .from('completions')
         .select('*')
         .eq('child_id', childId)
+        .order('completed_at', { ascending: false })
 
       setCompletions(newCompletions || [])
+
+      const { data: allComp } = await supabase
+        .from('completions')
+        .select('*, chore:chores(*)')
+        .eq('child_id', childId)
+        .order('completed_at', { ascending: false })
+
+      setAllCompletions(allComp || [])
     } catch (err) {
       console.error(err)
     }
@@ -110,26 +130,52 @@ export default function KidDashboardPage() {
     setTapping(null)
   }
 
-  const getChoreStatus = (choreId: string) => {
-    const completion = completions.find(c => c.chore_id === choreId)
-    if (!completion) return 'open'
-    return completion.status
+  // Returns 'open' | 'pending' | 'paid' | 'hidden'
+  // 'hidden' means the chore should not appear in My Chores tab
+  const getChoreStatus = (chore: any): string => {
+    const choreCompletions = completions
+      .filter(c => c.chore_id === chore.id)
+      .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+
+    const latest = choreCompletions[0]
+
+    // Never been done — always show as open
+    if (!latest) return 'open'
+
+    // Currently pending — always show
+    if (latest.status === 'pending') return 'pending'
+
+    // One-time chore that's paid — hide from My Chores (goes to History only)
+    if (chore.frequency === 'one-time' && latest.status === 'paid') return 'hidden'
+
+    // Recurring chore that's paid — check if enough time has passed
+    if (latest.status === 'paid') {
+      const paidAt = new Date(latest.paid_at || latest.completed_at)
+      const now = new Date()
+      const diffMs = now.getTime() - paidAt.getTime()
+      const diffDays = diffMs / (1000 * 60 * 60 * 24)
+
+      if (chore.frequency === 'daily' && diffDays < 1) return 'hidden'
+      if (chore.frequency === 'weekly' && diffDays < 7) return 'hidden'
+      if (chore.frequency === 'monthly' && diffDays < 30) return 'hidden'
+
+      // Enough time has passed — show as open again
+      return 'open'
+    }
+
+    return latest.status
   }
 
   const getTotalEarned = () => {
-    const paidCompletions = completions.filter(c => c.status === 'paid')
-    return paidCompletions.reduce((total, c) => {
-      const chore = chores.find(ch => ch.id === c.chore_id)
-      return total + (chore?.sats_value || 0)
-    }, 0)
+    return allCompletions
+      .filter(c => c.status === 'paid')
+      .reduce((total, c) => total + (c.chore?.sats_value || 0), 0)
   }
 
   const getPendingEarned = () => {
-    const pendingCompletions = completions.filter(c => c.status === 'pending')
-    return pendingCompletions.reduce((total, c) => {
-      const chore = chores.find(ch => ch.id === c.chore_id)
-      return total + (chore?.sats_value || 0)
-    }, 0)
+    return allCompletions
+      .filter(c => c.status === 'pending')
+      .reduce((total, c) => total + (c.chore?.sats_value || 0), 0)
   }
 
   const getChoreEmoji = (type: string) => {
@@ -137,6 +183,21 @@ export default function KidDashboardPage() {
     if (type === 'task') return '✅'
     return '🧹'
   }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const getStatusBadge = (status: string) => {
+    if (status === 'paid') return { label: 'Paid', color: 'text-green-400 bg-green-500/15 border-green-500/30' }
+    if (status === 'pending') return { label: 'Waiting', color: 'text-[#FFB347] bg-[#F7931A]/15 border-[#F7931A]/30' }
+    if (status === 'rejected') return { label: 'Rejected', color: 'text-red-400 bg-red-500/15 border-red-500/30' }
+    return { label: status, color: 'text-[#7A8494] bg-white/5 border-white/10' }
+  }
+
+  // Only show chores that are not hidden
+  const visibleChores = chores.filter(chore => getChoreStatus(chore) !== 'hidden')
 
   if (loading) {
     return (
@@ -261,97 +322,161 @@ export default function KidDashboardPage() {
         </div>
       </div>
 
-      <div className="px-6 pb-10">
-        <h2 className="text-white font-black text-xl mb-4" style={{fontFamily: 'Nunito, sans-serif'}}>
-          My Chores
-        </h2>
+      <div className="px-6 mb-4">
+        <div className="flex bg-[#0F1318] border border-white/7 rounded-xl p-1">
+          <button
+            onClick={() => setActiveTab('chores')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'chores'
+                ? 'bg-[#F7931A] text-white'
+                : 'text-[#7A8494] hover:text-white'
+            }`}
+          >
+            My Chores {visibleChores.length > 0 && `(${visibleChores.length})`}
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'history'
+                ? 'bg-[#F7931A] text-white'
+                : 'text-[#7A8494] hover:text-white'
+            }`}
+          >
+            History {allCompletions.length > 0 && `(${allCompletions.length})`}
+          </button>
+        </div>
+      </div>
 
-        {chores.length === 0 ? (
-          <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-10 text-center">
-            <div className="text-5xl mb-3">😴</div>
-            <div className="text-white font-black text-xl mb-2" style={{fontFamily: 'Nunito, sans-serif'}}>
-              No chores yet!
+      {activeTab === 'chores' && (
+        <div className="px-6 pb-10">
+          {visibleChores.length === 0 ? (
+            <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-10 text-center">
+              <div className="text-5xl mb-3">🎉</div>
+              <div className="text-white font-black text-xl mb-2" style={{fontFamily: 'Nunito, sans-serif'}}>
+                All done!
+              </div>
+              <div className="text-[#7A8494] font-semibold text-sm">
+                No chores to do right now. Check back later!
+              </div>
             </div>
-            <div className="text-[#7A8494] font-semibold text-sm">
-              Ask your parent to add some chores.
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {chores.map(chore => {
-              const status = getChoreStatus(chore.id)
-              const isPending = status === 'pending'
-              const isPaid = status === 'paid'
-              const isOpen = status === 'open'
+          ) : (
+            <div className="space-y-3">
+              {visibleChores.map(chore => {
+                const status = getChoreStatus(chore)
+                const isPending = status === 'pending'
+                const isPaid = status === 'paid'
+                const isOpen = status === 'open'
 
-              return (
-                <div
-                  key={chore.id}
-                  className={`rounded-2xl p-5 border-2 transition-all ${
-                    isPaid
-                      ? 'bg-[#0F1318] border-green-500/30 opacity-60'
-                      : isPending
-                      ? 'bg-[#0F1318] border-[#F7931A]/40'
-                      : 'bg-[#0F1318] border-white/7'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${
-                      isPaid ? 'bg-green-500/10' :
-                      isPending ? 'bg-[#F7931A]/10' :
-                      'bg-[#F7931A]/10'
-                    }`}>
-                      {isPaid ? '✅' : getChoreEmoji(chore.chore_type)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-black text-base mb-1">
-                        {chore.title}
+                return (
+                  <div
+                    key={chore.id}
+                    className={`rounded-2xl p-5 border-2 transition-all ${
+                      isPending
+                        ? 'bg-[#0F1318] border-[#F7931A]/40'
+                        : 'bg-[#0F1318] border-white/7'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${
+                        isPending ? 'bg-[#F7931A]/10' : 'bg-[#F7931A]/10'
+                      }`}>
+                        {getChoreEmoji(chore.chore_type)}
                       </div>
-                      {chore.description && (
-                        <div className="text-[#7A8494] text-sm font-semibold mb-1">
-                          {chore.description}
+                      <div className="flex-1">
+                        <div className="text-white font-black text-base mb-1">
+                          {chore.title}
                         </div>
-                      )}
-                      {chore.youtube_url && (
-                        <button
-                          onClick={() => window.open(chore.youtube_url, '_blank')}
-                          className="text-[#3AADFF] text-sm font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
-                        >
-                          Watch Video
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <div className="text-[#F7931A] font-black text-lg" style={{fontFamily: 'Nunito, sans-serif'}}>
-                        {chore.sats_value.toLocaleString()} sats
+                        {chore.description && (
+                          <div className="text-[#7A8494] text-sm font-semibold mb-1">
+                            {chore.description}
+                          </div>
+                        )}
+                        <div className="text-[#7A8494] text-xs font-semibold capitalize">
+                          {chore.frequency === 'one-time' ? 'One time' : chore.frequency}
+                        </div>
+                        {chore.youtube_url && (
+                          <button
+                            onClick={() => window.open(chore.youtube_url, '_blank')}
+                            className="text-[#3AADFF] text-sm font-bold hover:underline bg-transparent border-none cursor-pointer p-0 mt-1"
+                          >
+                            Watch Video
+                          </button>
+                        )}
                       </div>
-                      {isOpen && (
-                        <button
-                          onClick={() => handleDone(chore)}
-                          disabled={tapping === chore.id}
-                          className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap"
-                        >
-                          {tapping === chore.id ? '...' : 'Done!'}
-                        </button>
-                      )}
-                      {isPending && (
-                        <div className="bg-[#F7931A]/15 border border-[#F7931A]/30 text-[#FFB347] text-xs font-bold px-3 py-1.5 rounded-xl">
-                          Waiting
+                      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                        <div className="text-[#F7931A] font-black text-lg" style={{fontFamily: 'Nunito, sans-serif'}}>
+                          {chore.sats_value.toLocaleString()} sats
                         </div>
-                      )}
-                      {isPaid && (
-                        <div className="bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-bold px-3 py-1.5 rounded-xl">
-                          Paid!
-                        </div>
-                      )}
+                        {isOpen && (
+                          <button
+                            onClick={() => handleDone(chore)}
+                            disabled={tapping === chore.id}
+                            className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {tapping === chore.id ? '...' : 'Done!'}
+                          </button>
+                        )}
+                        {isPending && (
+                          <div className="bg-[#F7931A]/15 border border-[#F7931A]/30 text-[#FFB347] text-xs font-bold px-3 py-1.5 rounded-xl">
+                            Waiting
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+        <div className="px-6 pb-10">
+          {allCompletions.length === 0 ? (
+            <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-10 text-center">
+              <div className="text-5xl mb-3">📋</div>
+              <div className="text-white font-black text-xl mb-2" style={{fontFamily: 'Nunito, sans-serif'}}>
+                No history yet!
+              </div>
+              <div className="text-[#7A8494] font-semibold text-sm">
+                Complete some chores to see your history here.
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {allCompletions.map(completion => {
+                const badge = getStatusBadge(completion.status)
+                return (
+                  <div key={completion.id} className="bg-[#0F1318] border border-white/7 rounded-2xl p-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-[#F7931A]/10 flex items-center justify-center text-2xl flex-shrink-0">
+                        {getChoreEmoji(completion.chore?.chore_type)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-white font-black text-base mb-1">
+                          {completion.chore?.title}
+                        </div>
+                        <div className="text-[#7A8494] text-xs font-semibold">
+                          {formatDate(completion.completed_at)}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                        <div className="text-[#F7931A] font-black text-base" style={{fontFamily: 'Nunito, sans-serif'}}>
+                          {completion.chore?.sats_value?.toLocaleString()} sats
+                        </div>
+                        <div className={`text-xs font-bold px-3 py-1 rounded-xl border ${badge.color}`}>
+                          {badge.label}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
