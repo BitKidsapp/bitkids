@@ -103,6 +103,12 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[#7A8494] text-sm font-semibold">{profile?.name}</span>
+          <button
+            onClick={() => window.location.href = '/dashboard/settings'}
+            className="text-[#7A8494] hover:text-white text-sm font-bold transition-colors"
+          >
+            Settings
+          </button>
           <button onClick={handleSignOut} className="text-[#7A8494] hover:text-white text-sm font-bold transition-colors">
             Sign Out
           </button>

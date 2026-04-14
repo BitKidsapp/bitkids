@@ -13,6 +13,10 @@ export default function KidDashboardPage() {
   const [completions, setCompletions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [tapping, setTapping] = useState<string | null>(null)
+  const [editingAddress, setEditingAddress] = useState(false)
+  const [bitcoinAddress, setBitcoinAddress] = useState('')
+  const [savingAddress, setSavingAddress] = useState(false)
+  const [addressSaved, setAddressSaved] = useState(false)
 
   useEffect(() => {
     const getData = async () => {
@@ -26,6 +30,7 @@ export default function KidDashboardPage() {
         .single()
 
       setChild(child)
+      setBitcoinAddress(child?.bitcoin_address || '')
 
       if (child?.family_id) {
         const { data: chores } = await supabase
@@ -49,6 +54,22 @@ export default function KidDashboardPage() {
     }
     getData()
   }, [childId])
+
+  const handleSaveAddress = async () => {
+    setSavingAddress(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ bitcoin_address: bitcoinAddress })
+      .eq('id', childId)
+
+    if (!error) {
+      setAddressSaved(true)
+      setEditingAddress(false)
+      setChild((prev: any) => ({ ...prev, bitcoin_address: bitcoinAddress }))
+      setTimeout(() => setAddressSaved(false), 3000)
+    }
+    setSavingAddress(false)
+  }
 
   const handleDone = async (chore: any) => {
     setTapping(chore.id)
@@ -127,7 +148,6 @@ export default function KidDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#080B10]">
-
       <div className="bg-[#161B22] border-b border-white/7 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-[#7A8494] text-sm font-bold">👀 Viewing as</span>
@@ -137,7 +157,7 @@ export default function KidDashboardPage() {
           onClick={() => window.location.href = '/dashboard'}
           className="text-[#F7931A] text-sm font-black hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
         >
-          ← Exit to Dashboard
+          Exit to Dashboard
         </button>
       </div>
 
@@ -174,9 +194,76 @@ export default function KidDashboardPage() {
         </div>
       </div>
 
+      <div className="px-6 mb-6">
+        <div className="bg-[#0F1318] border border-white/7 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">₿</span>
+              <div>
+                <div className="text-white font-black text-sm">Bitcoin Address</div>
+                <div className="text-[#7A8494] text-xs font-semibold">Where sats get sent</div>
+              </div>
+            </div>
+            {!editingAddress && (
+              <button
+                onClick={() => setEditingAddress(true)}
+                className="text-[#F7931A] text-xs font-black hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
+              >
+                {child?.bitcoin_address ? 'Edit' : '+ Add'}
+              </button>
+            )}
+          </div>
+
+          {editingAddress ? (
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={bitcoinAddress}
+                onChange={e => setBitcoinAddress(e.target.value)}
+                placeholder="bc1q... or lightning address"
+                className="w-full bg-[#080B10] border border-white/7 rounded-xl px-4 py-3 text-white placeholder-[#7A8494] focus:outline-none focus:border-[#F7931A]/50 transition-colors font-mono text-xs"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setEditingAddress(false); setBitcoinAddress(child?.bitcoin_address || '') }}
+                  className="flex-1 bg-[#161B22] border border-white/7 text-white font-bold py-2 rounded-xl text-sm hover:border-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveAddress}
+                  disabled={savingAddress}
+                  className="flex-1 bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black py-2 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {savingAddress ? '...' : 'Save'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {child?.bitcoin_address ? (
+                <div className="text-[#7A8494] text-xs font-mono break-all">
+                  {child.bitcoin_address}
+                </div>
+              ) : (
+                <div className="text-[#7A8494] text-xs font-semibold">
+                  No address set yet — tap + Add to set one
+                </div>
+              )}
+              {addressSaved && (
+                <div className="text-green-400 text-xs font-bold mt-2">
+                  Address saved!
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="px-6 pb-10">
         <h2 className="text-white font-black text-xl mb-4" style={{fontFamily: 'Nunito, sans-serif'}}>
-          My Chores 🧹
+          My Chores
         </h2>
 
         {chores.length === 0 ? (
@@ -230,7 +317,7 @@ export default function KidDashboardPage() {
                           onClick={() => window.open(chore.youtube_url, '_blank')}
                           className="text-[#3AADFF] text-sm font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
                         >
-                          ▶ Watch Video
+                          Watch Video
                         </button>
                       )}
                     </div>
@@ -244,17 +331,17 @@ export default function KidDashboardPage() {
                           disabled={tapping === chore.id}
                           className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap"
                         >
-                          {tapping === chore.id ? '...' : 'Done! ⚡'}
+                          {tapping === chore.id ? '...' : 'Done!'}
                         </button>
                       )}
                       {isPending && (
                         <div className="bg-[#F7931A]/15 border border-[#F7931A]/30 text-[#FFB347] text-xs font-bold px-3 py-1.5 rounded-xl">
-                          ⏳ Waiting
+                          Waiting
                         </div>
                       )}
                       {isPaid && (
                         <div className="bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-bold px-3 py-1.5 rounded-xl">
-                          ✓ Paid!
+                          Paid!
                         </div>
                       )}
                     </div>

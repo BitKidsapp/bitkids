@@ -7,6 +7,7 @@ export default function VerifyPage() {
   const [pending, setPending] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
     const getData = async () => {
@@ -33,6 +34,12 @@ export default function VerifyPage() {
     }
     getData()
   }, [])
+
+  const handleCopy = (address: string, id: string) => {
+    navigator.clipboard.writeText(address)
+    setCopied(id)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
   const handleApprove = async (completion: any) => {
     setActing(completion.id)
@@ -79,11 +86,11 @@ export default function VerifyPage() {
           onClick={() => window.location.href = '/dashboard'}
           className="text-[#7A8494] hover:text-white font-bold transition-colors bg-transparent border-none cursor-pointer"
         >
-          ← Back
+          Back
         </button>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FFD166] to-[#F7931A] flex items-center justify-center text-white font-black text-base">
-            ₿K
+            BK
           </div>
           <span className="text-white font-black text-xl" style={{fontFamily: 'Nunito, sans-serif'}}>
             Bit<span className="text-[#FFB347]">Kids</span>
@@ -94,7 +101,7 @@ export default function VerifyPage() {
       <div className="max-w-lg mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="text-white font-black text-3xl mb-2" style={{fontFamily: 'Nunito, sans-serif'}}>
-            Review & Approve ✅
+            Review and Approve
           </h1>
           <p className="text-[#7A8494] font-semibold">
             {pending.length === 0
@@ -136,11 +143,31 @@ export default function VerifyPage() {
 
                 <div className="bg-[#080B10] rounded-xl p-4 mb-5">
                   <div className="text-[#7A8494] text-xs font-bold uppercase tracking-wider mb-2">
-                    Send sats to
+                    Send sats to ({completion.child?.name}'s wallet)
                   </div>
-                  <div className="text-[#7A8494] text-xs font-mono">
-                    No wallet address set yet
-                  </div>
+                  {completion.child?.bitcoin_address ? (
+                    <div className="flex items-center gap-2">
+                      <div className="text-white text-xs font-mono break-all flex-1">
+                        {completion.child.bitcoin_address}
+                      </div>
+                      <button
+                        onClick={() => handleCopy(completion.child.bitcoin_address, completion.id)}
+                        className="flex-shrink-0 bg-[#F7931A]/10 border border-[#F7931A]/30 text-[#FFB347] text-xs font-black px-3 py-1.5 rounded-lg hover:bg-[#F7931A]/20 transition-colors"
+                      >
+                        {copied === completion.id ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-[#7A8494] text-xs font-semibold">
+                      No wallet address set for {completion.child?.name} —{' '}
+                      <button
+                        onClick={() => window.location.href = `/dashboard/kid/${completion.child_id}`}
+                        className="text-[#F7931A] font-bold underline bg-transparent border-none cursor-pointer"
+                      >
+                        add one in their profile
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -149,14 +176,14 @@ export default function VerifyPage() {
                     disabled={acting === completion.id}
                     className="bg-[#161B22] border border-white/7 text-white font-black py-3 rounded-xl hover:border-red-500/40 transition-colors disabled:opacity-50"
                   >
-                    ✗ Reject
+                    Reject
                   </button>
                   <button
                     onClick={() => handleApprove(completion)}
                     disabled={acting === completion.id}
                     className="bg-gradient-to-r from-[#FFB347] to-[#F7931A] text-white font-black py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
-                    {acting === completion.id ? '...' : '✓ Approve & Pay'}
+                    {acting === completion.id ? '...' : 'Approve and Pay'}
                   </button>
                 </div>
               </div>
